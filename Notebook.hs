@@ -16,7 +16,9 @@ readListFromFile :: FilePath -> IO String
 readListFromFile filename = do
     fileExists <- doesFileExist filename
     case fileExists of
-        True -> readFile filename
+        True -> do
+            contents <- readFile filename
+            return (filter (/= '\n') contents)
         False -> return ""
 
 go :: IO NoteTree
