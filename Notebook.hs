@@ -3,7 +3,7 @@ module Notebook where
 -- To run it, try:
 -- ghci
 -- :load Notebook
--- go
+-- try 
 
 import System.IO
 import System.IO.Error
