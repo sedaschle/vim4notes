@@ -65,7 +65,9 @@ executable vim4notes
 
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.17.2.1,
-                      vty-windows
+                      vty-windows,
+                      vty,
+                      brick
 
     -- Directories containing source files.
     hs-source-dirs:   app

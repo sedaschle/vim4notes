@@ -1,5 +1,13 @@
 module Main where
-import Graphics.Vty.Platform.Windows
+
+
+import Brick
+import Graphics.Vty
+import Graphics.Vty.Platform.Windows (mkVty)
+
+
+ui :: Widget ()
+ui = str "Hello, world!"
 
 main :: IO ()
-main = putStrLn "Hello, Haskell!"
+main = simpleMain ui
