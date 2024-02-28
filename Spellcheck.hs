@@ -6,18 +6,31 @@ import qualified Data.Map as Map
 import qualified Data.ByteString.Lazy as BL
 import Data.Map (Map, fromList)
 import System.Directory (doesFileExist)
-import Data.List (break, sort)
+import Data.List (break, sort, sortBy, nub)
 import Data.Maybe
-
+import qualified Data.Ord
+import Data.Ord (comparing)
 
 probability :: String -> Map String Double -> Double
 probability word probdict =
     let prob = Map.lookup word probdict in fromMaybe 0 prob
 
-topncorrections :: String -> Int -> (Map String Double) -> [String]
---topncorrections word n probdict = take n (reverse (sort [probability x probdict | x <- candidates word probdict]))
-topncorrections word n probdict = take n $ reverse $ sort [x | x <- candidates word probdict]
+leastlikelywords :: [String] -> Double -> Map String Double -> [String]
+leastlikelywords text bound probdict =
+    let cand = nub text
+        wrdprbpairs = zip [probability x probdict | x <- cand ] cand
+        --sorted = sortBy (\(a,_) (b,_) -> compare a b) wrdprbpairs
+        --finalists = map snd (take n sorted)
+        finalists = map snd (filter (\(a, b) -> a <= bound) wrdprbpairs)
+    in finalists
 
+topncorrections :: String -> Int -> Map String Double -> [String]
+topncorrections word n probdict =
+    let cand = nub (candidates word probdict)
+        wrdprbpairs = zip [probability x probdict | x <- cand ] cand
+        sorted = reverse (sortBy (\(a,_) (b,_) -> compare a b) wrdprbpairs)
+        finalists = map snd (take n sorted)
+    in finalists
 
 -- Citation 2 - doersino
 candidates :: String -> Map String Double -> [String]
@@ -46,7 +59,6 @@ edits1 word = deletes ++ transposes ++ replaces ++ inserts
 -- Citation 2 - doersino 
 edits2 :: String -> [String]
 edits2 word = [ e2 | e1 <- edits1 word, e2 <- edits1 e1 ]
-
 
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
