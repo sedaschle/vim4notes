@@ -58,7 +58,7 @@ executable vim4notes
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules: Notebook, Note, Spellcheck, SpellChecker
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -67,7 +67,11 @@ executable vim4notes
     build-depends:    base ^>=4.17.2.1,
     brick,
     vty,
-    vty-windows
+    vty-windows,
+    directory,
+    time,
+    containers,
+    bytestring
 
     -- Directories containing source files.
     hs-source-dirs:   app
