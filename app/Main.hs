@@ -58,24 +58,26 @@ modeSwitch vim =
         putStrLn "Enter a mode command: "
         ans <- getLine
         if (ans `elem` ["m"])
-            then do
-                let _mode' = MENU    -- changing _mode doesn't really do anything since values in a Vim type are immutable, 
+            then do let _mode' = MENU    -- changing _mode doesn't really do anything since values in a Vim type are immutable, 
                                      -- hence we would just created a new instance of Vim with a different value of _mode where instead
                                      -- we can just call the functions directly. Keeping as is to match widget implementation for now. 
                 -- initMenuEvent vim
-        if (ans `elem` ["n"])
-            then do
-                let _mode' = NAVIGATION
-                -- initNavEvent vim
-        if (ans `elem` ["f"])
-            then do 
-                let _mode' = FILE
-                -- initFileEvent vim
-        if (ans `elem` ["w"])
-                let _mode' = WRITE
-                -- initWriteEvent vim
-        else let _mode' = WRITE
-        --initWriteEvent
+            else if (ans `elem` ["n"])
+                then do
+                    let _mode' = NAVIGATION
+                    -- initNavEvent vim
+                    else if (ans `elem` ["f"])
+                        then do 
+                        let _mode' = FILE
+                        -- initFileEvent vim
+                        else if (ans `elem` ["w"])
+                            then do
+                            let _mode' = WRITE
+                            -- initWriteEvent vim
+                            else
+                                -- let _mode' = WRITE
+                                putStrLn("Invalid Command, mode set to write")
+                                --initWriteEvent
 
 
 initWriteEvent :: Vim -> IO ()
@@ -85,7 +87,9 @@ initWriteEvent vim =
         if (ans `elem` ["/"])
             then do
                 runCommand vim
-        if -- to be implemented  based on:
+                putStrLn("Running Commands: ")
+        else putStrLn("Invalid Command")
+        --if to be implemented  based on:
         -- if (entry.length() == 0) {
         --     if (currentNote.getParent() != null) {
         --         currentNote = currentNote.getParent();
@@ -111,24 +115,26 @@ initNavEvent vim =
             then do
                 let _currentNote' = currentNote vim
                 --currentNote = getParent(currentNote);
-        if (ans `elem` ["l"])
-            then do
-                let _currentNote' = currentNote vim
-                --currentNote = currentNote.getChild();
-        if (ans `elem` ["k"])
-            then do
-                let _currentNote' = currentNote vim
-                --currentNote = move(1, currentNote);
-        if (ans `elem` ["i"])
-            then do
-                let _currentNote' = currentNote vim
-                --currentNote = move(-1, currentNote);
-        if (ans `elem` ["/"])
-            then do 
-                putStrLn "Enter a Command: "
-                newans <- getLine
-                runCommand vim newans
+            else if (ans `elem` ["l"])
+                then do
+                    let _currentNote' = currentNote vim
+                    --currentNote = currentNote.getChild();
+                else if (ans `elem` ["k"])
+                    then do
+                        let _currentNote' = currentNote vim
+                        --currentNote = move(1, currentNote);
+                    else if (ans `elem` ["i"])
+                        then do
+                            let _currentNote' = currentNote vim
+                            --currentNote = move(-1, currentNote);
+                        else if (ans `elem` ["/"])
+                            then do 
+                                putStrLn "Enter a Command: "
+                                newans <- getLine
+                                runCommand vim newans
         else putStrLn "Invalid Command"
+
+
 
 initMenuEvent :: Vim -> IO ()
 initMenuEvent vim =
@@ -142,27 +148,28 @@ initMenuEvent vim =
                 runCommand vim newans
         else 
             case readMaybe ans :: Maybe Double of
-                Just _ -> -- to be implemented  currentNotebook = library.get(Integer.parseInt(str));   currentNote = currentNotebook.getNotes().get(0);
-
+                Just _ -> putStrLn "Setting current notebook"-- to be implemented  currentNotebook = library.get(Integer.parseInt(str));   currentNote = currentNotebook.getNotes().get(0);
                 Nothing -> putStrLn "Enter a number corresponding to a notebook."
+
 
 initFileEvent :: Vim -> IO()
 initFileEvent vim  =
-    let pathnames = listDirectory "./data"
     do 
+        let pathnames = listDirectory "./data"
+
         putStrLn "Enter a file command: "
         ans <- getLine  
         if (ans `elem` ["save"])
             then do
                 putStrLn "Saved"
                 --to be implemented
-        if (ans `elem` ["/"])
-            then do
-                putStrLn "Enter a Command: "
-                newans <- getLine
-                runCommand vim newans
-        if (ans `elem` ["load"])
-            then do -- to be implemented
+            else if (ans `elem` ["/"])
+                then do
+                    putStrLn "Enter a Command: "
+                    newans <- getLine
+                    runCommand vim newans
+                else if (ans `elem` ["load"])
+                    then do -- to be implemented
         else putStrLn "Invalid Command"
         
         
@@ -173,41 +180,47 @@ runCommand vim inString =
         if (inString `elem` ["print"])
             then do
                 print vim
-        if (inString `elem` ["exit"])
-            then do
-                return ()
-        if (inString `elem` ["delete"])
-            then do
-                delete vim
-        if (inString `elem` ["cut"])
-            then do
-                cut vim
-        if (inString `elem` ["paste"])
-            then do
-                past vim
-        if (inString `elem` ["mode"])
-            then do
-                modeSwitch vim
+            else if (inString `elem` ["exit"])
+                then do
+                    return ()
+                else if (inString `elem` ["delete"])
+                    then do
+                        delete vim
+                    else if (inString `elem` ["cut"])
+                        then do
+                            cut vim
+                        else if (inString `elem` ["paste"])
+                            then do
+                                past vim
+                            else if (inString `elem` ["mode"])
+                                then do
+                                    modeSwitch vim
         else putStrLn "Not a valid command"
 
 
 print :: Vim -> IO ()
 print vim = 
-    let note = currentNote vim
+    do 
+        let note = currentNote vim
+        putStrLn("Printing")
+        return ()
     -- to be implemented
 
 delete :: Vim -> IO ()
 delete vim = 
-    let deleteTag = noteid (_currentNote vim)  --hopefully this gets the node id of the current note in the vim instance, i got it from chat
+    do 
+        let deleteTag = noteid (_currentNote vim)  --hopefully this gets the node id of the current note in the vim instance, i got it from chat
     -- let _currentNote' = --currentNote.getParent()    --pretty sure this doesn't really work
     -- let updatedNote = --removeDent(deleteTag) 
     -- let _currentNote' = updatedNote
+        return()
 
 cut :: Vim -> IO ()
 cut vim = 
-    let _clipboard' = _currentNote vim
-    _clipboard vim  = 
-    delete vim
+    do 
+        let _clipboard' = _currentNote vim
+        let _clipboard vim  = _clipboard
+        delete vim
 
 paste :: Vim -> IO ()
 -- paste vim = To be implemented
@@ -224,8 +237,8 @@ newVim notebook currnote homenote mode clip running target = do
             _currentNote = currnote,
             _homeNote = homenote,
             _mode = mode,
-            _clipboard = clip
-            _running = running
+            _clipboard = clip,
+            _running = running,
             _targetFile = target
         }
     return vim
