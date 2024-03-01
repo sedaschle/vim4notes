@@ -5,6 +5,7 @@ import System.Directory
 import System.Environment
 import Data.Time.Clock.POSIX 
 import Data.Maybe (listToMaybe)
+import Debug.Trace
 
 data Note = Note {
     noteid :: Integer,
@@ -12,11 +13,20 @@ data Note = Note {
     section :: Bool,
     children :: [Note],
     parent :: Maybe Note 
-} deriving (Show, Read, Eq)
+} deriving (Show, Read)
+
+instance Eq Note where
+    -- Two notes are equal if all of their fields are equal
+    (Note id1 content1 sec1 children1 parent1) == (Note id2 content2 sec2 children2 parent2) =
+        id1 == id2 &&
+        content1 == content2 &&
+        sec1 == sec2 &&
+        children1 == children2 &&
+        parent1 == parent2
 
 -- just a test note to make sure 'save' is working
 testNote :: Note
-testNote = Note 1 "testing" True [Note 6 "inside" False [] Nothing ] Nothing
+testNote = Note 1 "testing" True [Note 6 "inside" False [Note 9 "Deep in" False [] Nothing] Nothing, Note 7 "Other In" False [] Nothing, Note 8 "Other in 2" False [] Nothing ] Nothing
 
 -- load note from text file
 loadNote :: FilePath -> IO Note
@@ -117,19 +127,44 @@ indexOfNote note (x:xs)
     | note == x = Just 0
     | otherwise = fmap (+1) (indexOfNote note xs)
 
+-- getNextChild :: Note -> Maybe Note
+-- getNextChild note = case parent note of 
+--     Just parentNote -> do
+--         let childrenList = children parentNote
+--         case indexOfNote note childrenList of
+--             Just index -> listToMaybe (drop (index + 1) childrenList)
+--             Nothing    -> Nothing
+--     Nothing -> Nothing   
+
+-- getPreviousChild :: Note -> Maybe Note
+-- getPreviousChild note = case parent note of 
+--     Just parentNote -> do
+--         let childrenList = children parentNote
+--         case indexOfNote note childrenList of
+--             Just index -> listToMaybe (take index childrenList)
+--             Nothing    -> Nothing
+--     Nothing -> Nothing  
+
 getNextChild :: Note -> Maybe Note
 getNextChild note = do
     parentNote <- parent note
     let childrenList = children parentNote
-    index <- indexOfNote note childrenList
-    listToMaybe (drop (index + 1) childrenList)
+    case indexOfNote note childrenList of
+        Just index -> if index < length childrenList - 1
+                          then Just (childrenList !! (index + 1))
+                          else Nothing
+        Nothing    -> Nothing
 
 getPreviousChild :: Note -> Maybe Note
 getPreviousChild note = do
     parentNote <- parent note
     let childrenList = children parentNote
-    index <- indexOfNote note childrenList
-    listToMaybe (take index childrenList)
+    case indexOfNote note childrenList of
+        Just index -> if index > 0
+                          then Just (childrenList !! (index - 1))
+                          else Nothing
+        Nothing    -> Nothing
+
 
 makeUnderline :: String -> String
 makeUnderline str = "\x1B[4m" ++ str ++ "\x1B[0m"

@@ -78,6 +78,7 @@ initWriteEvent vim =
 initNavEvent :: Vim -> IO ()
 initNavEvent vim =
     do 
+        putStrLn (content (_currentNote vim))
         putStrLn "Enter a nav command: "
         ans <- getLine
         
@@ -101,7 +102,7 @@ initNavEvent vim =
                     Nothing     -> do 
                         putStrLn "No child note exists."
                         initNavEvent vim
-        else if (ans `elem` ["k"]) then
+        else if (ans `elem` ["k"]) then do
                 case getNextChild (_currentNote vim) of 
                     Just next -> do
                         let updatedVim = newVim (_currentNotebook vim) next (_homeNote vim) (_clipboard vim) (_targetFile vim)
@@ -112,7 +113,7 @@ initNavEvent vim =
                         putStrLn "No next note"
                         initNavEvent vim
 
-        else if (ans `elem` ["i"]) then
+        else if (ans `elem` ["i"]) then do
                 case getPreviousChild (_currentNote vim) of
                     Just prev -> do
                         let updatedVim = newVim (_currentNotebook vim) prev (_homeNote vim) (_clipboard vim) (_targetFile vim)
@@ -227,6 +228,8 @@ newVim notebook currnote homenote clipNote target =
         _targetFile = target
     }
     
+testNote :: Note
+testNote = Note 1 "testing" True [Note 6 "inside" False [Note 9 "Deep in" False [] Nothing] (Just Main.testNote), Note 7 "Other In" False [] (Just Main.testNote), Note 8 "Other in 2" False [] (Just Main.testNote) ] Nothing
 
 
 main :: IO ()
@@ -234,7 +237,7 @@ main =
     do
         let vim = Vim{
             _currentNotebook = Notebook { title = "", notes = [] },
-            _currentNote = Note {noteid = 0, content = "", section = False, children = [], parent = Nothing},
+            _currentNote = Note {noteid = 0, content = "", section = False, children = [Main.testNote], parent = Nothing},
             _homeNote = Note {noteid = 0, content = "", section = False, children = [], parent = Nothing},
             _clipboard = Nothing,
             _targetFile = ""
