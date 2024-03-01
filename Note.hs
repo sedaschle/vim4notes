@@ -4,6 +4,7 @@ import System.IO.Error
 import System.Directory
 import System.Environment
 import Data.Time.Clock.POSIX 
+import Data.Maybe (listToMaybe)
 
 data Note = Note {
     noteid :: Integer,
@@ -98,6 +99,37 @@ printNote level current note =
         result = highlightedContent ++ "\n" ++ concatMap (printNote (level + 1) current) (children note)
     in result
     
+getParent :: Note -> Maybe Note
+getParent note = parent note
+
+getChild :: Note -> Maybe Note
+getChild note = 
+        getLast (children note)
+
+getLast :: [Note] -> Maybe Note
+getLast [] = Nothing
+getLast xs = Just (last xs)
+
+
+indexOfNote :: Note -> [Note] -> Maybe Int
+indexOfNote _ [] = Nothing
+indexOfNote note (x:xs)
+    | note == x = Just 0
+    | otherwise = fmap (+1) (indexOfNote note xs)
+
+getNextChild :: Note -> Maybe Note
+getNextChild note = do
+    parentNote <- parent note
+    let childrenList = children parentNote
+    index <- indexOfNote note childrenList
+    listToMaybe (drop (index + 1) childrenList)
+
+getPreviousChild :: Note -> Maybe Note
+getPreviousChild note = do
+    parentNote <- parent note
+    let childrenList = children parentNote
+    index <- indexOfNote note childrenList
+    listToMaybe (take index childrenList)
 
 makeUnderline :: String -> String
 makeUnderline str = "\x1B[4m" ++ str ++ "\x1B[0m"
